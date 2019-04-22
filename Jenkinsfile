@@ -1,24 +1,84 @@
-node('dind-node') {
-  withMaven(maven:'M3') {
-    stage('Checkout') {
-      git url: 'https://github.com/piomin/sample-spring-microservices-new.git', credentialsId: 'piomin-github', branch: 'master'
+#!/usr/bin/env groovy
+
+
+pipeline {
+    agent any
+    options {
+        skipDefaultCheckout()
     }
-    stage('Build') {
-      dir('config-service') {
-        sh 'mvn clean install'
-        def pom = readMavenPom file:'pom.xml'
-        print pom.version
-        env.version = pom.version
-        currentBuild.description = "Release: ${env.version}"
-      }
-    }
-    stage('Image') {
-      dir ('config-service') {
-        docker.withRegistry('https://192.168.99.100:5000') {
-          def app = docker.build "piomin/config-service:${env.version}"
-          app.push()
+
+    stages {
+        stage('printenv') {
+            steps {
+                sh 'printenv'
+            }
         }
-      }
+
+        stage('checkout') {
+            steps {
+                deleteDir()
+                retry(3) { checkout scm }
+                stash includes: '**/*', name: 'repo'
+            }
+        }
+
+        stage('lint and tests') {
+            parallel {
+                stage('lint') {
+                    agent {
+                        docker {
+                            image 'maven:3-alpine'
+                        }
+                    }
+                    steps {
+                        deleteDir()
+                        unstash 'repo'
+
+                        sh """
+                            mvn --version
+
+                            tools/lint.sh
+                        """
+                    }
+
+                    post { always { deleteDir() } }
+                }
+
+                stage('test-compile') {
+                    agent {
+                        docker {
+                            image 'maven:3-alpine'
+                        }
+                    }
+                    steps {
+                        deleteDir()
+                        unstash 'repo'
+
+                        sh """
+                            mvn --version
+
+                            tools/test-compile.sh
+                        """
+                    }
+
+                    post { always { deleteDir() } }
+                }
+            }
+        }
     }
-  }
+
+    post {
+        always {
+            deleteDir()
+            echo 'done'
+        }
+
+        success {
+            echo 'success'
+        }
+
+        failure {
+            echo 'failure'
+        }
+    }
 }
