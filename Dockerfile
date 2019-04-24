@@ -1,8 +1,19 @@
-FROM openjdk:8-jre-alpine
-ENV APP_FILE config-service-1.0-SNAPSHOT.jar
-ENV APP_HOME /app
+FROM maven:3.5-jdk-8 as config-service-build
+
+WORKDIR /app
+
+ADD pom.xml pom.xml
+RUN mvn clean dependency:go-offline
+
+ADD src src
+RUN mvn -o package
+
+
+FROM openjdk:8u171-jre-alpine
+WORKDIR /app
+
+COPY --from=config-service-build /app/target/*.jar .
+
 EXPOSE 8088
-COPY target/$APP_FILE $APP_HOME/
-WORKDIR $APP_HOME
-ENTRYPOINT ["sh", "-c"]
-CMD ["exec java -jar $APP_FILE"]
+
+CMD java -jar *.jar
