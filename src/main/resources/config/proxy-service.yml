@@ -13,11 +13,11 @@ logging:
 zuul:
   routes:
     department:
-      path: /department/**
+      path: /api/department/**
       serviceId: department-service
     employee:
-      path: /employee/**
+      path: /api/employee/**
       serviceId: employee-service
     organization:
-      path: /organization/**
+      path: /api/organization/**
       serviceId: organization-service
