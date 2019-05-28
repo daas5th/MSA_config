@@ -24,26 +24,6 @@ pipeline {
 
         stage('lint and tests') {
             parallel {
-                stage('lint') {
-                    agent {
-                        docker {
-                            image 'maven:3-alpine'
-                        }
-                    }
-                    steps {
-                        deleteDir()
-                        unstash 'repo'
-
-                        sh """
-                            mvn --version
-
-                            tools/lint.sh
-                        """
-                    }
-
-                    post { always { deleteDir() } }
-                }
-
                 stage('test-compile') {
                     agent {
                         docker {
