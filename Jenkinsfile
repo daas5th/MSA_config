@@ -43,10 +43,11 @@ pipeline {
             }
 
             stages {
-                stage('install git') {
+                stage('install dependencies') {
                     steps {
                         sh """
                             apk add git
+                            apk add bash
                         """
                     }
                 }
