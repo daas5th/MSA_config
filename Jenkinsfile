@@ -50,7 +50,7 @@ pipeline {
         }
 
         stage('deployment docker image') {
-//            when { anyOf { branch 'master'; branch 'development' } }
+            when { anyOf { branch 'master'; branch 'development' } }
             agent {
                 docker {
                     image 'docker:latest'
@@ -85,7 +85,7 @@ pipeline {
                 }
 
                 stage('deploy on development') {
-//                    when { branch 'development' }
+                    when { branch 'development' }
                     steps {
                         deleteDir()
                         unstash 'repo'
@@ -106,7 +106,7 @@ pipeline {
                 }
 
                 stage('deploy on master') {
-//                    when { branch 'master' }
+                    when { branch 'master' }
                     steps {
                         deleteDir()
                         unstash 'repo'
