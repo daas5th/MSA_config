@@ -108,7 +108,6 @@ pipeline {
 
     post {
         always {
-            deleteDir()
             echo 'done'
         }
 
