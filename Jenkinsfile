@@ -79,8 +79,8 @@ pipeline {
                                 ls -al tools
                                 ls -al tools/docker
 
-tools/docker/build_docker.sh
                                 tools/docker/push_docker.sh --tag develop
+tools/docker/build_docker.sh
                                 tools/docker/push_docker.sh --tag develop-$git_commit_short
                             """
                         }
