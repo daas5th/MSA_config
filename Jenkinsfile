@@ -3,9 +3,6 @@
 
 pipeline {
     agent any
-    options {
-        skipDefaultCheckout()
-    }
     environment {
         DOCKER_HUB_ACCOUNT = credentials('docker-account-daas5th')
     }
@@ -14,14 +11,6 @@ pipeline {
         stage('printenv') {
             steps {
                 sh 'printenv'
-            }
-        }
-
-        stage('checkout') {
-            steps {
-                deleteDir()
-                retry(3) { checkout scm }
-                stash includes: '**/*', name: 'repo'
             }
         }
 
@@ -34,47 +23,37 @@ pipeline {
                         }
                     }
                     steps {
-                        deleteDir()
-                        unstash 'repo'
-
                         sh """
                             mvn --version
 
                             tools/test-compile.sh
                         """
                     }
-
-                    post { always { deleteDir() } }
                 }
             }
         }
 
         stage('deployment docker image') {
-            when { anyOf { branch 'master'; branch 'development' } }
+//            when { anyOf { branch 'master'; branch 'development' } }
             agent {
                 docker {
-                    image 'maven:3-alpine'
+                    image 'docker:latest'
                     args '-v /var/run/docker.sock:/var/run/docker.sock'
                 }
             }
 
             stages {
-                stage('install docker') {
+                stage('install dependencies') {
                     steps {
-                        deleteDir()
-                        unstash 'repo'
-
                         sh """
-                            curl -fsSL https://get.docker.com/ | sh
+                            apk add git
+                            apk add bash
                         """
                     }
                 }
 
                 stage('docker hub login') {
                     steps {
-                        deleteDir()
-                        unstash 'repo'
-
                         sh """
                             docker login \
                                 -u ${DOCKER_HUB_ACCOUNT_USR} \
@@ -84,11 +63,8 @@ pipeline {
                 }
 
                 stage('deploy on development') {
-                    when { branch 'development' }
+//                    when { branch 'development' }
                     steps {
-                        deleteDir()
-                        unstash 'repo'
-
                         script {
                             def git_commit_short = sh (
                                 script: 'git rev-parse --short=8 HEAD',
@@ -107,9 +83,6 @@ pipeline {
                 stage('deploy on master') {
                     when { branch 'master' }
                     steps {
-                        deleteDir()
-                        unstash 'repo'
-
                         script {
                             def git_commit_short = sh (
                                 script: 'git rev-parse --short=8 HEAD',
@@ -132,7 +105,6 @@ pipeline {
 
     post {
         always {
-            deleteDir()
             echo 'done'
         }
 
