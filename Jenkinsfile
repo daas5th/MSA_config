@@ -3,9 +3,6 @@
 
 pipeline {
     agent any
-    options {
-        skipDefaultCheckout()
-    }
     environment {
         DOCKER_HUB_ACCOUNT = credentials('docker-account-daas5th')
     }
@@ -14,14 +11,6 @@ pipeline {
         stage('printenv') {
             steps {
                 sh 'printenv'
-            }
-        }
-
-        stage('checkout') {
-            steps {
-                deleteDir()
-                retry(3) { checkout scm }
-                stash name: 'repo', useDefaultExcludes: false
             }
         }
 
@@ -34,17 +23,12 @@ pipeline {
                         }
                     }
                     steps {
-                        deleteDir()
-                        unstash 'repo'
-
                         sh """
                             mvn --version
 
                             tools/test-compile.sh
                         """
                     }
-
-                    post { always { deleteDir() } }
                 }
             }
         }
@@ -61,9 +45,6 @@ pipeline {
             stages {
                 stage('install git') {
                     steps {
-                        deleteDir()
-                        unstash 'repo'
-
                         sh """
                             apk add git
                         """
@@ -72,9 +53,6 @@ pipeline {
 
                 stage('docker hub login') {
                     steps {
-                        deleteDir()
-                        unstash 'repo'
-
                         sh """
                             docker login \
                                 -u ${DOCKER_HUB_ACCOUNT_USR} \
@@ -86,9 +64,6 @@ pipeline {
                 stage('deploy on development') {
 //                    when { branch 'development' }
                     steps {
-                        deleteDir()
-                        unstash 'repo'
-
                         script {
                             sh 'ls -al'
                             sh 'ls -al tools'
@@ -111,9 +86,6 @@ pipeline {
                 stage('deploy on master') {
                     when { branch 'master' }
                     steps {
-                        deleteDir()
-                        unstash 'repo'
-
                         script {
                             def git_commit_short = sh (
                                 script: 'git rev-parse --short=8 HEAD',
