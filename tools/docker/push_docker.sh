@@ -23,47 +23,74 @@ cd_into_script_path() {
     cd ${script_path}
 }
 
-get_version() {
-    echo $(mvn -q \
-        -Dexec.executable=echo \
-        -Dexec.args='${project.version}' \
-        --non-recursive \
-        exec:exec)
+info_msg() {
+    echo -e "${yellow}[INFO] $@${nocolor}"
 }
 
+err_msg() {
+    echo -e "${red}[ERROR] $@${nocolor}" >&2
+}
+
+usage() {
+    err_msg "Usage:
+$0 --tag master-d037ab9c
+$0 --tag latest
+"
+}
+
+
 ### Main
-echo -e "${yellow}[INFO] [${BASH_SOURCE[0]}] executed.${nocolor}"
+info_msg "[${BASH_SOURCE[0]}] executed."
 
 if ! command_exists docker; then
-    echo -e "${red}[ERROR] Install docker first.\n\
+    err_msg "Install docker first.\n\
 [MacOS] $ brew cask install docker\n\
-[Linux] $ curl -fsSL https://get.docker.com | sh${nocolor}"
+[Linux] $ curl -fsSL https://get.docker.com | sh"
     exit 1
 fi
 
 if ! command_exists mvn; then
-    echo -e "${red}[ERROR] install maven first. \n\
+    err_msg "install maven first. \n\
 [Mac] brew install maven \n\
 [Centos] yum install -y maven \n\
-[Ubuntu] apt-get install -y maven${nocolor}"
-    exit 1;
+[Ubuntu] apt-get install -y maven"
+    exit 1
 fi
 
-(
-cd_into_script_path
-./build_docker.sh
-)
+while true; do
+    if [[ $# -eq 0 ]]; then
+        break
+    fi
+
+    case $1 in
+        --tag)
+            shift
+
+            case $1 in (-*|"") usage; exit 1; esac
+            tag="$1"
+            shift; continue
+            ;;
+    esac
+    shift
+done
+
+
+if [[ -z ${tag} ]]; then
+    usage
+    exit 1
+fi
 
 (
 cd_into_script_path
 cd ../..
 
-echo -e "${yellow}[INFO] getting version...${nocolor}"
-version=$(get_version)
-echo -e "${yellow}[INFO] getting version done. [verison=$version]${nocolor}"
+tag_args="config-service daas5th/config-service:${tag}"
+info_msg "[$ docker tag ${tag_args}]"
+docker tag ${tag_args}
 
-docker tag config-service kujyp/config-service:$version
-docker push kujyp/config-service:$version
+info_msg "[$ docker push ${tag_args}]"
+push_args="daas5th/config-service:${tag}"
+docker push ${push_args}
 )
 
-echo -e "${yellow}[INFO] [${BASH_SOURCE[0]}] Done.${nocolor}"
+info_msg "[${BASH_SOURCE[0]}] Done."
