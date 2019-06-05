@@ -53,23 +53,12 @@ pipeline {
 //            when { anyOf { branch 'master'; branch 'development' } }
             agent {
                 docker {
-                    image 'maven:3-alpine'
+                    image 'docker:latest'
                     args '-v /var/run/docker.sock:/var/run/docker.sock'
                 }
             }
 
             stages {
-                stage('install docker') {
-                    steps {
-                        deleteDir()
-                        unstash 'repo'
-
-                        sh """
-                            curl -fsSL https://get.docker.com/ | sh
-                        """
-                    }
-                }
-
                 stage('docker hub login') {
                     steps {
                         deleteDir()
