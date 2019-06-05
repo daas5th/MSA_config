@@ -83,7 +83,7 @@ pipeline {
                     }
                 }
 
-                stage('deploy on master') {
+                stage('deploy on development') {
                     when { branch 'development' }
                     steps {
                         deleteDir()
