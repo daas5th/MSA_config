@@ -71,6 +71,9 @@ pipeline {
                             )
 
                             sh """
+                                echo $0
+                                cat $0
+
                                 ls -al
                                 ls -al tools
                                 ls -al tools/docker
