@@ -71,6 +71,7 @@ pipeline {
                             )
 
                             sh """
+                                pwd
                                 echo $0
                                 cat $0
 
