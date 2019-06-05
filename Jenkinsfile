@@ -72,8 +72,8 @@ pipeline {
 
                             sh """
                                 pwd
-                                echo $0
-                                cat $0
+                                echo \$0
+                                cat \$0
 
                                 ls -al
                                 ls -al tools
