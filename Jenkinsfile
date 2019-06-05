@@ -21,7 +21,7 @@ pipeline {
             steps {
                 deleteDir()
                 retry(3) { checkout scm }
-                stash includes: '**/*', name: 'repo'
+                stash name: 'repo', useDefaultExcludes: false
             }
         }
 
