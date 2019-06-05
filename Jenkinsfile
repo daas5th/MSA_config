@@ -90,6 +90,8 @@ pipeline {
                         unstash 'repo'
 
                         script {
+                            sh 'ls -al'
+
                             def git_commit_short = sh (
                                 script: 'git rev-parse --short=8 HEAD',
                                 returnStdout: true
