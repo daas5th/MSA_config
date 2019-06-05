@@ -59,6 +59,17 @@ pipeline {
             }
 
             stages {
+                stage('install git') {
+                    steps {
+                        deleteDir()
+                        unstash 'repo'
+
+                        sh """
+                            apk add git
+                        """
+                    }
+                }
+
                 stage('docker hub login') {
                     steps {
                         deleteDir()
