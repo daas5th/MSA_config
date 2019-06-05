@@ -65,16 +65,16 @@ pipeline {
 //                    when { branch 'development' }
                     steps {
                         script {
-                            sh 'ls -al'
-                            sh 'ls -al tools'
-                            sh 'ls -al tools/docker'
-
                             def git_commit_short = sh (
                                 script: 'git rev-parse --short=8 HEAD',
                                 returnStdout: true
                             )
 
                             sh """
+                                ls -al
+                                ls -al tools
+                                ls -al tools/docker
+
                                 tools/docker/build_docker.sh
                                 tools/docker/push_docker.sh --tag develop
                                 tools/docker/push_docker.sh --tag develop-$git_commit_short
