@@ -49,14 +49,6 @@ if ! command_exists docker; then
     exit 1
 fi
 
-if ! command_exists mvn; then
-    err_msg "install maven first. \n\
-[Mac] brew install maven \n\
-[Centos] yum install -y maven \n\
-[Ubuntu] apt-get install -y maven"
-    exit 1
-fi
-
 while true; do
     if [[ $# -eq 0 ]]; then
         break
